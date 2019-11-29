@@ -1,26 +1,50 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import Amplify, { API, graphqlOperation } from 'aws-amplify';
+import { withAuthenticator } from 'aws-amplify-react';
+import awsconfig from './aws-exports';
+import * as queries from './graphql/queries';
+import * as mutations from './graphql/mutations';
+
+Amplify.configure(awsconfig);
 
 const App: React.FC = () => {
+  const [name, setName] = useState('');
+  const [todos, setTodos] = useState<any[]>([]);
+
+  useEffect(() => {
+    (API.graphql(graphqlOperation(queries.listTodos)) as Promise<any>).then(
+      result => {
+        setTodos(result.data.listTodos.items);
+      }
+    );
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          (API.graphql(
+            graphqlOperation(mutations.createTodo, {
+              input: {
+                name,
+              },
+            })
+          ) as Promise<any>).then(result => {
+            setTodos(oldTodos => [result.data.createTodo, ...oldTodos]);
+          });
+        }}
+      >
+        <input value={name} onChange={e => setName(e.target.value)}></input>
+        <button type="submit">add</button>
+      </form>
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>{todo.name}</li>
+        ))}
+      </ul>
     </div>
   );
-}
+};
 
-export default App;
+export default withAuthenticator(App, true);
