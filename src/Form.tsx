@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
-import { graphql, MutateProps } from 'react-apollo';
-import gql from 'graphql-tag';
-import * as mutations from './graphql/mutations';
-import { CreateTodoMutation, CreateTodoMutationVariables } from './API';
+import { useCreateTodoMutation } from './graphql/generated';
 
-type Props = {} & MutateProps<CreateTodoMutation, CreateTodoMutationVariables>;
-
-const Form: React.FC<Props> = props => {
-  const { mutate } = props;
+const Form: React.FC = () => {
+  const [createTodo] = useCreateTodoMutation();
   const [name, setName] = useState('');
   return (
     <form
       onSubmit={e => {
         e.preventDefault();
-        mutate({
+        createTodo({
           variables: {
             input: {
               name,
@@ -29,9 +24,4 @@ const Form: React.FC<Props> = props => {
   );
 };
 
-export default graphql<
-  {},
-  CreateTodoMutation,
-  CreateTodoMutationVariables,
-  Props
->(gql(mutations.createTodo))(Form);
+export default Form;

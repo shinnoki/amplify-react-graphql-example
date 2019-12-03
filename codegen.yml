@@ -1,0 +1,17 @@
+overwrite: true
+schema:
+  - './src/graphql/schema.graphql'
+  - './src/graphql/aws-appsync.graphql'
+documents:
+  - './src/graphql/queries/*.graphql'
+  - './src/graphql/mutations/*.graphql'
+generates:
+  src/graphql/generated.tsx:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      withComponent: false
+      withHooks: true
+      withHOC: false

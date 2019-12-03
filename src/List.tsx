@@ -1,14 +1,9 @@
 import React from 'react';
-import { graphql, DataProps } from 'react-apollo';
-import gql from 'graphql-tag';
-import * as queries from './graphql/queries';
-import { ListTodosQuery, ListTodosQueryVariables } from './API';
+import { useListTodosQuery } from './graphql/generated';
 
-type Props = {} & DataProps<ListTodosQuery, ListTodosQueryVariables>;
-
-const List: React.FC<Props> = props => {
-  const { data } = props;
-  const todos = (data.listTodos && data.listTodos.items) || [];
+const List: React.FC = () => {
+  const { data } = useListTodosQuery();
+  const todos = (data && data.listTodos && data.listTodos.items) || [];
   return (
     <ul>
       {todos.map(todo => (todo ? <li key={todo.id}>{todo.name}</li> : null))}
@@ -16,6 +11,4 @@ const List: React.FC<Props> = props => {
   );
 };
 
-export default graphql<{}, ListTodosQuery, ListTodosQueryVariables, Props>(
-  gql(queries.listTodos)
-)(List);
+export default List;
