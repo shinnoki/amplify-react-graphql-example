@@ -1,49 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import Amplify, { API, graphqlOperation } from 'aws-amplify';
+import React from 'react';
+import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from 'aws-amplify-react';
+import AWSAppSyncClient, { AUTH_TYPE } from 'aws-appsync';
+import { ApolloProvider } from 'react-apollo';
 import awsconfig from './aws-exports';
-import * as queries from './graphql/queries';
-import * as mutations from './graphql/mutations';
+import Form from './Form';
+import List from './List';
 
 Amplify.configure(awsconfig);
 
+const client = new AWSAppSyncClient({
+  url: awsconfig.aws_appsync_graphqlEndpoint,
+  region: awsconfig.aws_appsync_region,
+  auth: {
+    type: AUTH_TYPE.AMAZON_COGNITO_USER_POOLS,
+    jwtToken: async () =>
+      (await Auth.currentSession()).getAccessToken().getJwtToken(),
+  },
+});
+
 const App: React.FC = () => {
-  const [name, setName] = useState('');
-  const [todos, setTodos] = useState<any[]>([]);
-
-  useEffect(() => {
-    (API.graphql(graphqlOperation(queries.listTodos)) as Promise<any>).then(
-      result => {
-        setTodos(result.data.listTodos.items);
-      }
-    );
-  }, []);
-
   return (
-    <div className="App">
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          (API.graphql(
-            graphqlOperation(mutations.createTodo, {
-              input: {
-                name,
-              },
-            })
-          ) as Promise<any>).then(result => {
-            setTodos(oldTodos => [result.data.createTodo, ...oldTodos]);
-          });
-        }}
-      >
-        <input value={name} onChange={e => setName(e.target.value)}></input>
-        <button type="submit">add</button>
-      </form>
-      <ul>
-        {todos.map(todo => (
-          <li key={todo.id}>{todo.name}</li>
-        ))}
-      </ul>
-    </div>
+    <ApolloProvider client={client}>
+      <Form />
+      <List />
+    </ApolloProvider>
   );
 };
 

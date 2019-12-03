@@ -9,7 +9,10 @@
     "@types/react-dom": "16.9.4",
     "aws-amplify": "^1.2.4",
     "aws-amplify-react": "^2.5.4",
+    "aws-appsync": "^3.0.2",
+    "graphql-tag": "^2.10.1",
     "react": "^16.12.0",
+    "react-apollo": "2.5.8",
     "react-dom": "^16.12.0",
     "react-scripts": "3.2.0",
     "typescript": "3.7.2"
